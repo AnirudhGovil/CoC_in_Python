@@ -8,11 +8,10 @@ import time
 m = 26
 n = 26
 myMap = Map(m, n)
-myArmy = Army(m, n)
+myClan = Clan(m, n, 10)
 myMap.setupMap()
 
 heals = HealSpell()
-rages = RageSpell()
 
 # render loop
 
@@ -21,11 +20,11 @@ rages = RageSpell()
 g = Get()
 statusText = ''
 longMayHeReign = True
-myMap.draw(myArmy)
+myMap.draw(myClan)
 while(True):
         
     # check for win/loss states
-    check = myMap.checkWinLoss(myArmy)
+    check = myMap.checkWinLoss(myClan)
     if check == 1:
         print("You won! All buildings destroyed")
         break
@@ -33,9 +32,9 @@ while(True):
         print("You lost. All troops are dead. You got gapped")
         break
     
-    # move units
-    myMap.draw(myArmy)
-    myArmy.moveUnits(myMap)
+    # move troops
+    myMap.draw(myClan)
+    myClan.moveTroops(myMap)
     
     # print status texts for last turn
     if statusText != '':
@@ -48,7 +47,7 @@ while(True):
     timestep=0
     while(True):
         command = input_to(g)
-        result = myArmy.king.move(command, myMap)
+        result = myClan.king.move(command, myMap)
         if(result is True):
             break
  
@@ -58,8 +57,8 @@ while(True):
     if command == 'q':
         break
     elif command == '1' or command == '2' or command == '3':
-        result = myArmy.spawnBarbarian(command, myMap)
-        if result == 0:
+        result = myClan.spawn(command, myMap)
+        if result == 1:
             statusText = ("Troop spawned at spawnpoint " + command)
         else:
             statusText = ("No more spawns available")
@@ -67,28 +66,22 @@ while(True):
     elif command == ' ':
         statusText = ("King attacks!")
     
-    elif command == 'j':
-        result = myArmy.useSpell(command)
+    elif command == 'h':
+        result = myClan.useHealSpell()
         if result == 0:
             statusText = ('Heal spell used')
         else:
             statusText = ('No more heal spells')
-    elif command == 'k':
-        result = rages.use(myArmy)
-        if result == 0:
-            statusText = ('Rage spell used')
-        else:
-            statusText = ('No more rage spells')
     
-    if myArmy.king.alive == False and longMayHeReign == True:
+    if myClan.king.alive == False and longMayHeReign == True:
         statusText = ("The king has died!")
         longMayHeReign = False
         
     
-    myMap.fireDefenses(myArmy)
+    myMap.fireDefenses(myClan)
 
     
-myMap.draw(myArmy)
+myMap.draw(myClan)
 if check == 1:
     print("You won! All buildings destroyed")
 elif check == -1:

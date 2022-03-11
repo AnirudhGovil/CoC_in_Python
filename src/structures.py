@@ -4,10 +4,10 @@ import colorama
 import numpy as np
 
 class Structure:
-    def __init__(self, posX, posY, sizeX, sizeY, health):
+    def __init__(self, X, Y, sizeX, sizeY, health):
         self.alive = True
-        self.posX = posX
-        self.posY = posY
+        self.X = X
+        self.Y = Y
         self.sizeX = sizeX
         self.sizeY = sizeY
         self.health = health
@@ -15,22 +15,22 @@ class Structure:
     
     # returns the distance to a position as a float
     def distanceTo(self, x, y):
-        distance = (self.posX + self.sizeX/2 - x)**2 + (self.posY + self.sizeY/2  - y)**2
+        distance = (self.X + self.sizeX/2 - x)**2 + (self.Y + self.sizeY/2  - y)**2
         distance = distance ** 0.5
         
         return distance
     
     # checks if a position is adjacent to the structure                
     def isAdjacent(self, x, y):
-        if ((x == self.posX + self.sizeX or x == self.posX -1)
+        if ((x == self.X + self.sizeX or x == self.X -1)
             and
-            (y <= self.posY + self.sizeY and y >= self.posY - 1)
+            (y <= self.Y + self.sizeY and y >= self.Y - 1)
             ):
             return True
         
-        elif ((x <= self.posX + self.sizeX and x >= self.posX - 1)
+        elif ((x <= self.X + self.sizeX and x >= self.X - 1)
             and
-            (y == self.posY + self.sizeY or y == self.posY - 1)
+            (y == self.Y + self.sizeY or y == self.Y - 1)
             ):
             return True
         
@@ -38,12 +38,12 @@ class Structure:
     
     # checks if a position is inside a structure
     def isOverlapping(self, x, y):
-        # return (x < self.posX + self.sizeX and x >= self.posX 
-        #         and y < self.posY + self.sizeY and y >= self.posY 
+        # return (x < self.X + self.sizeX and x >= self.X 
+        #         and y < self.Y + self.sizeY and y >= self.Y 
         #         and self.alive == False
         #     )
     
-        return x >= self.posX and x < self.posX + self.sizeX and y >= self.posY and y < self.posY + self.sizeY and self.alive
+        return x >= self.X and x < self.X + self.sizeX and y >= self.Y and y < self.Y + self.sizeY and self.alive
     
     # takes damage from a hit
     def takeDamage(self, damage):
@@ -71,7 +71,7 @@ class Cannon(Structure):
         self.charge = 0
         self.shotCooldown = 3
         self.range = 8
-        self.AD = 150
+        self.attack = 150
         
     def fire(self, army):
         # wait for the shot to cooldown
@@ -79,42 +79,42 @@ class Cannon(Structure):
             self.fired = False
             self.charge += 1
         else:
-            # target the closest unit
+            # target the closest troop
             anyAlive = False
-            for unit in army.units:
-                if unit.alive == True:
+            for troop in army.troops:
+                if troop.alive == True:
                     anyAlive = True
                     break
             
-            # no units on map
-            if (len(army.units) == 0 or anyAlive == False):
+            # no troops on map
+            if (len(army.troops) == 0 or anyAlive == False):
                 if army.king.alive == True:
                     closest = army.king
-                    minDist = army.king.distanceTo(self.posX + self.sizeX/2, self.posY + self.sizeY/2)
+                    minDist = army.king.distanceTo(self.X + self.sizeX/2, self.Y + self.sizeY/2)
                 else:
                     minDist = 10000 # hold fire
             # troops present
             else:
-                for unit in army.units:
-                    if unit.alive == True:
-                        closest = unit
-                        minDist = unit.distanceTo(self.posX + self.sizeX/2, self.posY + self.sizeY/2)
+                for troop in army.troops:
+                    if troop.alive == True:
+                        closest = troop
+                        minDist = troop.distanceTo(self.X + self.sizeX/2, self.Y + self.sizeY/2)
                 
-                for unit in army.units:
-                    if unit.alive == True:
-                        dist = unit.distanceTo(self.posX + self.sizeX/2, self.posY + self.sizeY/2)
+                for troop in army.troops:
+                    if troop.alive == True:
+                        dist = troop.distanceTo(self.X + self.sizeX/2, self.Y + self.sizeY/2)
                         if dist <= minDist:
-                            closest = unit
+                            closest = troop
                             minDist = dist
                             
-                if army.king.distanceTo(self.posX + self.sizeX/2, self.posY + self.sizeY/2) < minDist:
+                if army.king.distanceTo(self.X + self.sizeX/2, self.Y + self.sizeY/2) < minDist:
                     closest = army.king
-                    minDist = army.king.distanceTo(self.posX + self.sizeX/2, self.posY + self.sizeY/2)
+                    minDist = army.king.distanceTo(self.X + self.sizeX/2, self.Y + self.sizeY/2)
                 
             # fire in range        
             if minDist <= self.range:
                 self.fired = True
-                closest.takeDamage(self.AD)
+                closest.takeDamage(self.attack)
                 self.charge = 0
             else:
                 self.fired = False
@@ -127,7 +127,7 @@ class Wall(Structure):
         self.type = 'W'
         
     def isOverlapping(self, x, y):
-        return self.posX == x and self.posY == y
+        return self.X == x and self.Y == y
         
     
 # class to store the state of the map
@@ -141,9 +141,9 @@ class Map:
         
         self.numSpawnpoints = 3
         self.spawnpoints = []
-        self.spawnpoints.append({"posX": self.n-1, "posY": self.m-1})
-        self.spawnpoints.append({"posX": 0, "posY": self.m-1})
-        self.spawnpoints.append({"posX": self.n-1, "posY": 0})
+        self.spawnpoints.append({"X": self.n-1, "Y": self.m-1})
+        self.spawnpoints.append({"X": 0, "Y": self.m-1})
+        self.spawnpoints.append({"X": self.n-1, "Y": 0})
     
     # draws the map onto the terminal    
     def draw(self, army):
@@ -156,50 +156,50 @@ class Map:
             if building.alive == True:
                 for i in range(building.sizeX):
                     for j in range(building.sizeY):
-                        plan[building.posY + j][building.posX + i][0] = building.type
+                        plan[building.Y + j][building.X + i][0] = building.type
                         
                         if(isinstance(building, Cannon) and building.fired == True):
-                            plan[building.posY + j][building.posX + i][0] = 'f' # + building.type # building has fired
+                            plan[building.Y + j][building.X + i][0] = 'f' # + building.type # building has fired
                         
                         fraction = building.health/building.maxHealth
                         if fraction > 0.8:
-                            plan[building.posY + j][building.posX + i][1] = 'g'
+                            plan[building.Y + j][building.X + i][1] = 'g'
                         elif fraction > 0.4:
-                            plan[building.posY + j][building.posX + i][1] = 'y'
+                            plan[building.Y + j][building.X + i][1] = 'y'
                         else:
-                            plan[building.posY + j][building.posX + i][1] = 'r'
+                            plan[building.Y + j][building.X + i][1] = 'r'
                     
         for wall in self.walls:
             if wall.alive == True:
-                plan[wall.posY][wall.posX][0] = 'W'
+                plan[wall.Y][wall.X][0] = 'W'
                 fraction = wall.health/wall.maxHealth
                 if fraction > 0.5:
-                    plan[wall.posY][wall.posX][1] = 'g'
+                    plan[wall.Y][wall.X][1] = 'g'
                 elif fraction > 0.2:
-                    plan[wall.posY][wall.posX][1] = 'y'
+                    plan[wall.Y][wall.X][1] = 'y'
                 else:
-                    plan[wall.posY][wall.posX][1] = 'r'
+                    plan[wall.Y][wall.X][1] = 'r'
             
         for idx in range(self.numSpawnpoints):
-            plan[self.spawnpoints[idx]["posY"]][self.spawnpoints[idx]["posX"]][0] = 'S'
+            plan[self.spawnpoints[idx]["Y"]][self.spawnpoints[idx]["X"]][0] = 'S'
         
         
-        for unit in army.units:
-            if unit.alive == True:
-                plan[unit.posY][unit.posX][0] = unit.symbol
-                fraction = unit.HP/unit.maxHP
+        for troop in army.troops:
+            if troop.alive == True:
+                plan[troop.Y][troop.X][0] = troop.ID
+                fraction = troop.HP/troop.maxHP
                 if fraction > 0.5:
-                    plan[unit.posY][unit.posX][1] = 'g'
+                    plan[troop.Y][troop.X][1] = 'g'
                 elif fraction > 0.2:
-                    plan[unit.posY][unit.posX][1] = 'y'
+                    plan[troop.Y][troop.X][1] = 'y'
                 else:
-                    plan[unit.posY][unit.posX][1] = 'r'
+                    plan[troop.Y][troop.X][1] = 'r'
         
-        plan[army.king.posY][army.king.posX][0] = 'K'
+        plan[army.king.Y][army.king.X][0] = 'K'
         if army.king.alive == True:
-            plan[army.king.posY][army.king.posX][1] = 'w'
+            plan[army.king.Y][army.king.X][1] = 'w'
         else:
-            plan[army.king.posY][army.king.posX][1] = 'bl'
+            plan[army.king.Y][army.king.X][1] = 'bl'
                 
         # scan plan for each building tile
         print("\033c")  # clear screen
@@ -232,7 +232,7 @@ class Map:
                     framebuffer += '\033[48;5;230m' + 'C'
                 
                 elif(plan[i][j][0] == 'K'):
-                    framebuffer += '\033[48;2;177;0;186m' + army.king.symbol
+                    framebuffer += '\033[48;2;177;0;186m' + army.king.ID
                 elif(plan[i][j][0] == 'S'):
                     framebuffer += '\033[48;2;100;100;100;31m' + 'S'
                 elif(plan[i][j][0] == 'B'):
@@ -283,7 +283,7 @@ class Map:
                 building.takeDamage(dmg)
         
         for wall in self.walls:
-            if wall.posX == x and wall.posY == y:
+            if wall.X == x and wall.Y == y:
                 wall.takeDamage(dmg)
                 
     def checkWinLoss(self, Army):
@@ -294,8 +294,8 @@ class Map:
             if building.alive:
                 structureAlive = True
         
-        for unit in Army.units:
-            if unit.alive:
+        for troop in Army.troops:
+            if troop.alive:
                 troopAlive = True
                 
         if structureAlive == False:
