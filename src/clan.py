@@ -20,7 +20,7 @@ class Troop:
     
 class King(Troop):
     def __init__(self, m, n):
-        super().__init__(1000, 100, 1, 'K')
+        super().__init__(1000, 50, 1, 'K')
         self.lastMove = 'w'
 
 
@@ -175,7 +175,7 @@ def adjacency_helper(self, x, y):
 class Barbarian(Troop):
     
     def __init__(self, X, Y):
-        super().__init__(200, 50, 1, 'B')
+        super().__init__(300, 50, 1, 'B')
         self.location[0] = X
         self.location[1] = Y
            
@@ -231,7 +231,12 @@ class Clan:
     def spawn(self, location, Map):
         # location can be either 1 2 or 3
         if self.spawnsLeft > 0:
-            self.troops.append(Barbarian(Map.spawnpoints[int(location) - 1]["X"], Map.spawnpoints[int(location) - 1]["Y"]))
+            if(location=='1'):
+                self.troops.append(Barbarian(0,Map.m-1))
+            elif(location=='2'):
+                self.troops.append(Barbarian(Map.n-1,Map.m-1))
+            elif(location=='3'):
+                self.troops.append(Barbarian(Map.n-1,0))
             self.spawnsLeft -= 1
             return 1
         else:

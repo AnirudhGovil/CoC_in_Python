@@ -15,18 +15,20 @@ myMap.setupMap()
 # the user can input 'k' to skip a time frame
 g = Get()
 statusText = ''
-longMayHeReign = True
 myMap.draw(myClan)
+flag=0
 while(True):
         
     # check for win/loss states
-    check = myMap.checkWinLoss(myClan)
-    if check == 1:
+    flag=myMap.checkWinLoss(myClan)
+    if flag == 1:
         print("You won! All buildings destroyed")
         break
-    elif check == -1:
-        print("You lost. All troops are dead. You got gapped")
+    elif flag == -1:
+        print("You lost. All troops are dead.")
         break
+    elif flag == 0:
+        pass
     
     # move troops
     myMap.draw(myClan)
@@ -43,23 +45,21 @@ while(True):
     timestep=0
     while(True):
         command = input_to(g)
-        result = myClan.king.move(command, myMap)
-        if(result is True):
-            break
- 
-    
+        if(myClan.king.move(command, myMap)):
+            break 
 
-    # set flags    
     if command == 'q':
         break
+
+    elif command == ' ':
+        if myClan.king.alive:
+            statusText = ("King attacks!")
+
     elif command == '1' or command == '2' or command == '3':
         if myClan.spawn(command, myMap):
             statusText = ("Troop spawned at spawnpoint " + command)
         else:
             statusText = ("No more spawns available")
-            
-    elif command == ' ':
-        statusText = ("King attacks!")
     
     elif command == 'h':
         if myClan.useHealSpell() :
@@ -73,16 +73,14 @@ while(True):
        else:
            statusText = ('No more rage spells')
     
-    if myClan.king.alive == False and longMayHeReign == True:
-        statusText = ("The king has died!")
-        longMayHeReign = False
-        
     
+        
     myMap.fireDefenses(myClan)
 
     
 myMap.draw(myClan)
-if check == 1:
-    print("You won! All buildings destroyed")
-elif check == -1:
-    print("You lost. All troops are dead. You got gapped")
+if(flag==1): 
+    print("You won! All buildings destroyed")  
+if(flag==-1):
+    print("You lost. All troops are dead.") 
+print("Game Over")
