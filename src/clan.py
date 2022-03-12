@@ -21,6 +21,7 @@ class Troop:
 class King(Troop):
     def __init__(self, m, n):
         super().__init__(1000, 100, 1, 'K')
+        self.lastMove = 'w'
 
 
     # checks if move is in range
@@ -137,7 +138,8 @@ class King(Troop):
         # no move occured
         else:
             return False
-            
+
+#helps find closest buidling            
 def closest_helper(self,Map):
 
     flag=0 
@@ -147,12 +149,28 @@ def closest_helper(self,Map):
             if(flag==0):
                 closest = building
                 minDist = Map.buildings[0].distanceTo(self.location[0], self.location[1])
+                flag=1
             dist = building.distanceTo(self.location[0], self.location[1])
             if dist <= minDist:
                 closest = building
                 minDist = dist
     return closest
+
+# checks if a position is adjacent to the structure     
+def adjacency_helper(self, x, y):           
+    if ((x == self.location[0] + self.sizeX or x == self.location[0] -1)
+        and
+        (y <= self.location[1] + self.sizeY and y >= self.location[1] - 1)
+        ):
+        return True
     
+    elif ((x <= self.location[0] + self.sizeX and x >= self.location[0] - 1)
+        and
+        (y == self.location[1] + self.sizeY or y == self.location[1] - 1)
+        ):
+        return True
+    
+    return False  
 
 class Barbarian(Troop):
     
@@ -162,6 +180,7 @@ class Barbarian(Troop):
         self.location[1] = Y
            
     
+    
     def move(self, Map):
        
         if self.alive == True:
@@ -170,8 +189,9 @@ class Barbarian(Troop):
             closest = closest_helper(self,Map)
 
             if(closest):
+                
                 # attack it
-                if closest.isAdjacent(self.location[0], self.location[1]) and closest.alive:
+                if adjacency_helper(closest,self.location[0], self.location[1]) and closest.alive:
                     closest.takeDamage(self.attack)
 
                 # move otherwise
@@ -191,7 +211,7 @@ class Barbarian(Troop):
                     # check if wall is blocking, and attack it 
                     for wall in Map.walls:
                         if (wall.alive == True):
-                            if wall.isOverlapping(self.location[0] + xMove, self.location[1] + yMove):
+                            if wall.isStruct(self.location[0] + xMove, self.location[1] + yMove):
                                 wall.takeDamage(self.attack)
                                 return
 

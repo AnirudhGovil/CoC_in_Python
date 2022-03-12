@@ -2,127 +2,139 @@
 from random import seed
 import colorama
 import numpy as np
+from sympy import false
 
 class Structure:
-    def __init__(self, X, Y, sizeX, sizeY, health):
-        self.alive = True
-        self.location=[X,Y]
-        self.sizeX = sizeX
-        self.sizeY = sizeY
-        self.health = health
-        self.maxHealth = health
+    def __init__(self, X, Y, sizeX, sizeY, maxHP, ID):
+        self.ID = ID # symbol to be printed on screen
+        self.sizeX=sizeX #length
+        self.sizeY=sizeY #breadth
+        self.location = [X,Y] # X,Y
+        self.alive = True     #flag to check if alive
+        self.maxHP = maxHP
+        self.HP = maxHP # current HP
+    
+    # checks if a position is inside a structure
+    def isStruct(self, x, y):
+        if self.alive:
+            return self.location[0] <= x < self.location[0] + self.sizeX and self.location[1] <= y < self.location[1] + self.sizeY
+        else:
+            return False
     
     # returns the distance to a position as a float
     def distanceTo(self, x, y):
-        distance = (self.location[0] + self.sizeX/2 - x)**2 + (self.location[1] + self.sizeY/2  - y)**2
-        distance = distance ** 0.5
-        
-        return distance
-    
-    # checks if a position is adjacent to the structure                
-    def isAdjacent(self, x, y):
-        if ((x == self.location[0] + self.sizeX or x == self.location[0] -1)
-            and
-            (y <= self.location[1] + self.sizeY and y >= self.location[1] - 1)
-            ):
-            return True
-        
-        elif ((x <= self.location[0] + self.sizeX and x >= self.location[0] - 1)
-            and
-            (y == self.location[1] + self.sizeY or y == self.location[1] - 1)
-            ):
-            return True
-        
-        return False
-    
-    # checks if a position is inside a structure
-    def isOverlapping(self, x, y):
-        return x >= self.location[0] and x < self.location[0] + self.sizeX and y >= self.location[1] and y < self.location[1] + self.sizeY and self.alive
-    
+        return ((self.location[0] - x)**2 + (self.location[1] - y)**2)** 0.5
+   
     # takes damage from a hit
-    def takeDamage(self, damage):
-        self.health -= damage
-        
-        if self.health <= 0:
+    def takeDamage(self, dmg):
+        if self.HP > 0:
+            self.HP -= dmg
+        else:
             self.alive = False
         
 class Townhall(Structure):
-    def __init__(self, x, y):
-        Structure.__init__(self, x, y, 4, 3, 800)
-        self.type = 'T'
+    def __init__(self, x, y, maxHP):
+        Structure.__init__(self, x, y, 4, 3, maxHP, 'T')
         
 class Hut(Structure):
-    def __init__(self, x, y):
-        Structure.__init__(self, x, y, 2, 2, 400)
-        self.type = 'H'
-        
+    def __init__(self, x, y, maxHP):
+        Structure.__init__(self, x, y, 2, 2, maxHP, 'H')
+
+def closest_helper(self,Clan):
+
+    # no troops on map
+    if(len(Clan.troops) == 0):
+        if Clan.king.alive == True:
+            closest = Clan.king
+            minDist = Clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+        else:
+            closest=0
+            minDist = 10000 # hold fire
+    else:
+        allELiminated=True # flag for checking if there are any troops
+        flag=0 
+        closest=0
+        for troop in Clan.troops:
+            if troop.alive == True:
+                allELiminated=False
+                if(flag==0):
+                    closest = troop
+                    minDist = Clan.troops[0].distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+                    flag=1
+                dist = troop.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+                if dist <= minDist:
+                    closest = troop
+                    minDist = dist
+
+        if(allELiminated):
+            if Clan.king.alive == True:
+                closest = Clan.king
+                minDist = Clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+            else:
+                closest=0
+                minDist = 10000 # hold fire
+
+        if Clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2) < minDist:
+            closest = Clan.king
+            minDist = Clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+
+    return closest,minDist
+      
 class Cannon(Structure):
-    def __init__(self, x, y):
-        Structure.__init__(self, x, y, 2, 2, 300)
-        self.type = 'C'
-        self.fired = False
-        
-        self.charge = 0
-        self.shotCooldown = 3
+    def __init__(self, x, y, maxHP):
+        Structure.__init__(self, x, y, 2, 2, maxHP, 'C')
         self.range = 8
         self.attack = 150
+        self.fired=False
         
-    def fire(self, army):
+    def fire(self, clan):
         # wait for the shot to cooldown
-        if self.charge < self.shotCooldown:
-            self.fired = False
-            self.charge += 1
-        else:
-            # target the closest troop
-            anyAlive = False
-            for troop in army.troops:
-                if troop.alive == True:
-                    anyAlive = True
-                    break
-            
-            # no troops on map
-            if (len(army.troops) == 0 or anyAlive == False):
-                if army.king.alive == True:
-                    closest = army.king
-                    minDist = army.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
-                else:
-                    minDist = 10000 # hold fire
-            # troops present
-            else:
-                for troop in army.troops:
-                    if troop.alive == True:
-                        closest = troop
-                        minDist = troop.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
-                
-                for troop in army.troops:
-                    if troop.alive == True:
-                        dist = troop.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
-                        if dist <= minDist:
-                            closest = troop
-                            minDist = dist
-                            
-                if army.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2) < minDist:
-                    closest = army.king
-                    minDist = army.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
-                
-            # fire in range        
-            if minDist <= self.range:
-                self.fired = True
-                closest.takeDamage(self.attack)
-                self.charge = 0
-            else:
-                self.fired = False
-            
+        self.fired=False
+
+        #anyAlive = False
+        #for troop in clan.troops:
+        #    if troop.alive == True:
+        #        anyAlive = True
+        #        break
+        #
+        ## no troops on map
+        #if (len(clan.troops) == 0 or anyAlive == False):
+        #    if clan.king.alive == True:
+        #        closest = clan.king
+        #        minDist = clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+        #    else:
+        #        minDist = 10000 # hold fire
+#
+        ## troops present
+        #else:
+        #    for troop in clan.troops:
+        #        if troop.alive == True:
+        #            closest = troop
+        #            minDist = troop.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+        #    
+        #    for troop in clan.troops:
+        #        if troop.alive == True:
+        #            dist = troop.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+        #            if dist <= minDist:
+        #                closest = troop
+        #                minDist = dist
+        #                
+        #    if clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2) < minDist:
+        #        closest = clan.king
+        #        minDist = clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+        #    
+
+        closest,minDist=closest_helper(self,clan)
+        # fire in range        
+        if minDist <= self.range:
+            closest.takeDamage(self.attack)
+            self.fired=True
+        
         return
     
 class Wall(Structure):
-    def __init__(self, x, y):
-        Structure.__init__(self, x, y, 1, 1, 400)
-        self.type = 'W'
-        
-    def isOverlapping(self, x, y):
-        return self.location[0] == x and self.location[1] == y
-        
+    def __init__(self, x, y, maxHP):
+        Structure.__init__(self, x, y, 1, 1, maxHP, 'W')
     
 # class to store the state of the map
 class Map:
@@ -140,7 +152,7 @@ class Map:
         self.spawnpoints.append({"X": self.n-1, "Y": 0})
     
     # draws the map onto the terminal    
-    def draw(self, army):
+    def draw(self, clan):
         colorama.init()
         
         # first fill a m*n matrix, then draw over the empty tiles
@@ -150,12 +162,12 @@ class Map:
             if building.alive == True:
                 for i in range(building.sizeX):
                     for j in range(building.sizeY):
-                        plan[building.location[1] + j][building.location[0] + i][0] = building.type
+                        plan[building.location[1] + j][building.location[0] + i][0] = building.ID
                         
                         if(isinstance(building, Cannon) and building.fired == True):
                             plan[building.location[1] + j][building.location[0] + i][0] = 'f' # + building.type # building has fired
                         
-                        fraction = building.health/building.maxHealth
+                        fraction = building.HP/building.maxHP
                         if fraction > 0.8:
                             plan[building.location[1] + j][building.location[0] + i][1] = 'g'
                         elif fraction > 0.4:
@@ -166,7 +178,7 @@ class Map:
         for wall in self.walls:
             if wall.alive == True:
                 plan[wall.location[1]][wall.location[0]][0] = 'W'
-                fraction = wall.health/wall.maxHealth
+                fraction = wall.HP/wall.maxHP
                 if fraction > 0.5:
                     plan[wall.location[1]][wall.location[0]][1] = 'g'
                 elif fraction > 0.2:
@@ -178,7 +190,7 @@ class Map:
             plan[self.spawnpoints[idx]["Y"]][self.spawnpoints[idx]["X"]][0] = 'S'
         
         
-        for troop in army.troops:
+        for troop in clan.troops:
             if troop.alive == True:
                 plan[troop.location[1]][troop.location[0]][0] = troop.ID
                 fraction = troop.HP/troop.maxHP
@@ -189,11 +201,11 @@ class Map:
                 else:
                     plan[troop.location[1]][troop.location[0]][1] = 'r'
         
-        plan[army.king.location[1]][army.king.location[0]][0] = 'K'
-        if army.king.alive == True:
-            plan[army.king.location[1]][army.king.location[0]][1] = 'w'
+        plan[clan.king.location[1]][clan.king.location[0]][0] = 'K'
+        if clan.king.alive == True:
+            plan[clan.king.location[1]][clan.king.location[0]][1] = 'w'
         else:
-            plan[army.king.location[1]][army.king.location[0]][1] = 'bl'
+            plan[clan.king.location[1]][clan.king.location[0]][1] = 'bl'
                 
         # scan plan for each building tile
         print("\033c")  # clear screen
@@ -226,7 +238,7 @@ class Map:
                     framebuffer += '\033[48;5;230m' + 'C'
                 
                 elif(plan[i][j][0] == 'K'):
-                    framebuffer += '\033[48;2;177;0;186m' + army.king.ID
+                    framebuffer += '\033[48;2;177;0;186m' + clan.king.ID
                 elif(plan[i][j][0] == 'S'):
                     framebuffer += '\033[48;2;100;100;100;31m' + 'S'
                 elif(plan[i][j][0] == 'B'):
@@ -239,41 +251,41 @@ class Map:
             framebuffer += '\n'
         print(framebuffer, end='')
         
-        # print the health bar
+        # print the HP bar
         print('\033[38;2;177;0;186m', end='')
-        for i in range(int(army.king.HP/army.king.maxHP * self.n)):
+        for i in range(int(clan.king.HP/clan.king.maxHP * self.n)):
             print('██', end='')
         print('\033[40m\033[0m')
         
 
     
     # x and y define the top left of the structure
-    def addTownhall(self, x, y):
-        t = Townhall(x,y)
+    def addTownhall(self, x, y, maxHP):
+        t = Townhall(x,y,maxHP)
         self.buildings.append(t)
         
-    def addHut(self, x, y):
-        h = Hut(x,y)
+    def addHut(self, x, y,maxHP):
+        h = Hut(x,y,maxHP)
         self.buildings.append(h)
         
-    def addCannon(self, x, y):
-        c = Cannon(x,y)
+    def addCannon(self, x, y,maxHP):
+        c = Cannon(x,y,maxHP)
         self.buildings.append(c)
     
-    def addWall(self, x, y):
-        w = Wall(x,y)
+    def addWall(self, x, y,maxHP):
+        w = Wall(x,y,maxHP)
         self.walls.append(w)
     
     
-    def fireDefenses(self, army):
+    def fireDefenses(self, clan):
         for building in self.buildings:
             if building.alive == True and isinstance(building, Cannon):
-                building.fire(army)
+                building.fire(clan)
     
     
     def registerHit(self, x, y, dmg):
         for building in self.buildings:
-            if building.isOverlapping(x, y):
+            if building.isStruct(x, y):
                 building.takeDamage(dmg)
         
         for wall in self.walls:
@@ -300,86 +312,86 @@ class Map:
             return 0
     
     def setupMap(self):
-        self.addTownhall(10,10)
+        self.addTownhall(10,10,800)
 
-        self.addCannon(7,12)
-        self.addCannon(13,7)
-        self.addCannon(13,14)
+        self.addCannon(7,12,300)
+        self.addCannon(13,7,300)
+        self.addCannon(13,14,300)
 
-        self.addHut(7, 9)
-        self.addHut(10,7)
-        self.addHut(10,14)
-        self.addHut(15,9)
-        self.addHut(15,12)
+        self.addHut(7, 9,400)
+        self.addHut(10,7,400)
+        self.addHut(10,14,400)
+        self.addHut(15,9,400)
+        self.addHut(15,12,400)
 
 
-        self.addWall(9,9)
-        self.addWall(10,9)
-        self.addWall(11,9)
-        self.addWall(12,9)
-        self.addWall(13,9)
-        self.addWall(14,9)
+        self.addWall(9,9,400)
+        self.addWall(10,9,400)
+        self.addWall(11,9,400)
+        self.addWall(12,9,400)
+        self.addWall(13,9,400)
+        self.addWall(14,9,400)
 
-        self.addWall(9,7)
-        self.addWall(9,8)
-        self.addWall(9,10)
-        self.addWall(9,11)
-        self.addWall(9,12)
-        self.addWall(9,14)
-        self.addWall(9,15)
+        self.addWall(9,7,400)
+        self.addWall(9,8,400)
+        self.addWall(9,10,400)
+        self.addWall(9,11,400)
+        self.addWall(9,12,400)
+        self.addWall(9,14,400)
+        self.addWall(9,15,400)
 
-        self.addWall(14,10)
-        self.addWall(14,11)
-        self.addWall(14,12)
+        self.addWall(14,10,400)
+        self.addWall(14,11,400)
+        self.addWall(14,12,400)
 
-        self.addWall(9,13)
-        self.addWall(10,13)
-        self.addWall(11,13)
-        self.addWall(12,13)
-        self.addWall(13,13)
-        self.addWall(14,13)
+        self.addWall(9,13,400)
+        self.addWall(10,13,400)
+        self.addWall(11,13,400)
+        self.addWall(12,13,400)
+        self.addWall(13,13,400)
+        self.addWall(14,13,400)
         
-        self.addWall(9,6)
-        self.addWall(10,6)
-        self.addWall(11,6)
-        self.addWall(12,6)
-        self.addWall(13,6)
-        self.addWall(14,6)
-        self.addWall(15,6)
-        self.addWall(16,6)
+        self.addWall(9,6,400)
+        self.addWall(10,6,400)
+        self.addWall(11,6,400)
+        self.addWall(12,6,400)
+        self.addWall(13,6,400)
+        self.addWall(14,6,400)
+        self.addWall(15,6,400)
+        self.addWall(16,6,400)
         
-        self.addWall(9,16)
-        self.addWall(10,16)
-        self.addWall(11,16)
-        self.addWall(12,16)
-        self.addWall(13,16)
-        self.addWall(14,16)
-        self.addWall(15,16)
-        self.addWall(16,16)
+        self.addWall(9,16,400)
+        self.addWall(10,16,400)
+        self.addWall(11,16,400)
+        self.addWall(12,16,400)
+        self.addWall(13,16,400)
+        self.addWall(14,16,400)
+        self.addWall(15,16,400)
+        self.addWall(16,16,400)
         
-        self.addWall(17,6)
-        self.addWall(17,7)
-        self.addWall(17,8)
-        self.addWall(17,9)
-        self.addWall(17,10)
-        self.addWall(17,11)
-        self.addWall(17,12)
-        self.addWall(17,13)
-        self.addWall(17,14)
-        self.addWall(17,15)
-        self.addWall(17,16)
+        self.addWall(17,6,400)
+        self.addWall(17,7,400)
+        self.addWall(17,8,400)
+        self.addWall(17,9,400)
+        self.addWall(17,10,400)
+        self.addWall(17,11,400)
+        self.addWall(17,12,400)
+        self.addWall(17,13,400)
+        self.addWall(17,14,400)
+        self.addWall(17,15,400)
+        self.addWall(17,16,400)
         
-        self.addWall(6,8)
-        self.addWall(6,9)
-        self.addWall(6,10)
-        self.addWall(6,11)
-        self.addWall(6,12)
-        self.addWall(6,13)
-        self.addWall(6,14)
+        self.addWall(6,8,400)
+        self.addWall(6,9,400)
+        self.addWall(6,10,400)
+        self.addWall(6,11,400)
+        self.addWall(6,12,400)
+        self.addWall(6,13,400)
+        self.addWall(6,14,400)
         
-        self.addWall(7,8)
-        self.addWall(8,8)
+        self.addWall(7,8,400)
+        self.addWall(8,8,400)
         
-        self.addWall(7,14)
-        self.addWall(8,14)
+        self.addWall(7,14,400)
+        self.addWall(8,14,400)
         
