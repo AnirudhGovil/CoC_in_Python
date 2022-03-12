@@ -1,14 +1,12 @@
 from distutils.spawn import spawn
 from src.structures import *
-from src.army import *
+from src.clan import *
 from src.input import *
-
-import time
 
 m = 26
 n = 26
 myMap = Map(m, n)
-myClan = Clan(m, n, 20, 2 , 1)
+myClan = Clan(m, n, 10, 2 , 1)
 myMap.setupMap()
 
 # render loop
@@ -55,8 +53,7 @@ while(True):
     if command == 'q':
         break
     elif command == '1' or command == '2' or command == '3':
-        result = myClan.spawn(command, myMap)
-        if result == 1:
+        if myClan.spawn(command, myMap):
             statusText = ("Troop spawned at spawnpoint " + command)
         else:
             statusText = ("No more spawns available")
@@ -65,15 +62,13 @@ while(True):
         statusText = ("King attacks!")
     
     elif command == 'h':
-        result = myClan.useHealSpell()
-        if result == 1:
+        if myClan.useHealSpell() :
             statusText = ('Heal spell used')
         else:
             statusText = ('No more heal spells')
 
     elif command == 'j':
-       result = myClan.useRageSpell()
-       if result == 1:
+       if myClan.useRageSpell():
            statusText = ('Rage spell used')
        else:
            statusText = ('No more rage spells')

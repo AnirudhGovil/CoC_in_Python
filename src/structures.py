@@ -48,17 +48,17 @@ class Structure:
         
 class Townhall(Structure):
     def __init__(self, x, y):
-        Structure.__init__(self, x, y, 4, 3, 700)
+        Structure.__init__(self, x, y, 4, 3, 800)
         self.type = 'T'
         
 class Hut(Structure):
     def __init__(self, x, y):
-        Structure.__init__(self, x, y, 2, 2, 300)
+        Structure.__init__(self, x, y, 2, 2, 400)
         self.type = 'H'
         
 class Cannon(Structure):
     def __init__(self, x, y):
-        Structure.__init__(self, x, y, 2, 2, 400)
+        Structure.__init__(self, x, y, 2, 2, 300)
         self.type = 'C'
         self.fired = False
         
@@ -117,7 +117,7 @@ class Cannon(Structure):
     
 class Wall(Structure):
     def __init__(self, x, y):
-        Structure.__init__(self, x, y, 1, 1, 1500)
+        Structure.__init__(self, x, y, 1, 1, 400)
         self.type = 'W'
         
     def isOverlapping(self, x, y):
