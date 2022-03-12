@@ -8,15 +8,13 @@ import time
 m = 26
 n = 26
 myMap = Map(m, n)
-myClan = Clan(m, n, 10)
+myClan = Clan(m, n, 20, 2 , 1)
 myMap.setupMap()
-
-heals = HealSpell()
 
 # render loop
 
 # wait for user input
-# the user can input 'z' to skip a time frame
+# the user can input 'k' to skip a time frame
 g = Get()
 statusText = ''
 longMayHeReign = True
@@ -68,10 +66,17 @@ while(True):
     
     elif command == 'h':
         result = myClan.useHealSpell()
-        if result == 0:
+        if result == 1:
             statusText = ('Heal spell used')
         else:
             statusText = ('No more heal spells')
+
+    elif command == 'j':
+       result = myClan.useRageSpell()
+       if result == 1:
+           statusText = ('Rage spell used')
+       else:
+           statusText = ('No more rage spells')
     
     if myClan.king.alive == False and longMayHeReign == True:
         statusText = ("The king has died!")
