@@ -128,6 +128,43 @@ class King(Troop):
                 elif self.lastMove == 'd':
                     Map.registerHit(self.location[0] + 1, self.location[1], self.attack)
 
+            elif command == 'x':            
+                    Map.registerHit(self.location[0], self.location[1], self.attack/2)
+                    Map.registerHit(self.location[0]+1, self.location[1], self.attack/2)
+                    Map.registerHit(self.location[0]-1, self.location[1], self.attack/2)
+                    Map.registerHit(self.location[0], self.location[1]+1, self.attack/2)
+                    Map.registerHit(self.location[0], self.location[1]-1, self.attack/2)
+                    Map.registerHit(self.location[0]+1, self.location[1]-1, self.attack/2)
+                    Map.registerHit(self.location[0]-1, self.location[1]+1, self.attack/2)
+                    Map.registerHit(self.location[0]+1, self.location[1]+1, self.attack/2)
+                    Map.registerHit(self.location[0]-1, self.location[1]-1, self.attack/2)
+
+                    Map.registerHit(self.location[0]+2, self.location[1], self.attack/2)
+                    Map.registerHit(self.location[0]-2, self.location[1], self.attack/2)
+                    Map.registerHit(self.location[0], self.location[1]+2, self.attack/2)
+                    Map.registerHit(self.location[0], self.location[1]-2, self.attack/2)
+
+                    Map.registerHit(self.location[0]+2, self.location[1]-2, self.attack/2)
+                    Map.registerHit(self.location[0]-2, self.location[1]+2, self.attack/2)
+                    Map.registerHit(self.location[0]+2, self.location[1]+2, self.attack/2)
+                    Map.registerHit(self.location[0]-2, self.location[1]-2, self.attack/2)
+
+                    Map.registerHit(self.location[0]+2, self.location[1]-1, self.attack/2)
+                    Map.registerHit(self.location[0]-2, self.location[1]+1, self.attack/2)
+                    Map.registerHit(self.location[0]+2, self.location[1]+1, self.attack/2)
+                    Map.registerHit(self.location[0]-2, self.location[1]-1, self.attack/2)
+
+                    Map.registerHit(self.location[0]+1, self.location[1]-2, self.attack/2)
+                    Map.registerHit(self.location[0]-1, self.location[1]+2, self.attack/2)
+                    Map.registerHit(self.location[0]+1, self.location[1]+2, self.attack/2)
+                    Map.registerHit(self.location[0]-1, self.location[1]-2, self.attack/2)
+                    
+                    
+
+                    
+                    
+
+
             # no move occured
             else:
                 return False

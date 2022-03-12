@@ -250,7 +250,7 @@ class Map:
         self.walls.append(w)
     
     
-    def fireDefenses(self, clan):
+    def fireCanons(self, clan):
         for building in self.buildings:
             if isinstance(building, Cannon):
                 if building.alive: 
