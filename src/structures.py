@@ -3,7 +3,6 @@ from random import seed
 from unittest import case
 from colorama import Fore, Back, Style
 import numpy as np
-from sympy import false
 
 class Structure:
     def __init__(self, X, Y, sizeX, sizeY, maxHP, ID):

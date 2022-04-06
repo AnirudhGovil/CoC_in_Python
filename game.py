@@ -16,7 +16,6 @@ myMap.draw(myClan)
 
 replay_list1 = [myMap,]
 # render loop
-# the user can input 'k' to skip a time frame
 
 status = ''
 flag=0
@@ -46,14 +45,8 @@ while(True):
     
     #get input
     
-    timestep=0
-    while(True):
-        command = input_to(Get())
-        if(myClan.king.move(command, myMap)):
-            break 
-
-    
-
+    command = input_to(Get())
+    myClan.king.move(command, myMap)
 
     if command == 'q':
         break

@@ -13,7 +13,7 @@ with open("replays/clans", 'rb') as f:
 
 for i,j in zip(maps,clans):
     i.draw(j)
-    sleep(0.5)
+    sleep(0.2)
 
 
     
