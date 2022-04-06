@@ -79,6 +79,7 @@ while(True):
 
     myMap.fireCanons(myClan)
 
+    #for saving the replay
     replay_list1.append(copy.deepcopy(myMap))
     replay_list2.append(copy.deepcopy(myClan))
     
