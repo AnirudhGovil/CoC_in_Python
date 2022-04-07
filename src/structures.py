@@ -38,7 +38,7 @@ class Hut(Structure):
     def __init__(self, x, y, maxHP):
         Structure.__init__(self, x, y, 2, 2, maxHP, 'H')
 
-def closest_helper(self,Clan):
+def closest_helper_cannon(self,Clan):
 
     # no troops on map
     if(len(Clan.troops) == 0):
@@ -53,7 +53,7 @@ def closest_helper(self,Clan):
         flag=0 
         closest=0
         for troop in Clan.troops:
-            if troop.alive == True:
+            if troop.alive == True and troop.aerial==False:
                 allELiminated=False
                 if(flag==0):
                     closest = troop
@@ -88,7 +88,7 @@ class Cannon(Structure):
     def fire(self, clan):
         # reset canon colour
         self.fired=False
-        closest,minDist=closest_helper(self,clan)
+        closest,minDist=closest_helper_cannon(self,clan)
         # fire in range        
         if minDist <= self.range:
             closest.takeDamage(self.attack)
@@ -217,6 +217,9 @@ class Map:
 
                 elif(plan[i][j][0] == 'A'):
                    fb += Back.LIGHTWHITE_EX + 'A ' + Style.NORMAL
+
+                elif(plan[i][j][0] == 'L'):
+                   fb += Back.LIGHTWHITE_EX + 'L ' + Style.NORMAL
 
             fb += '\n' + Back.RESET + Fore.RESET + Style.RESET_ALL
         print(fb)

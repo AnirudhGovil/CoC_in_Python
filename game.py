@@ -68,6 +68,7 @@ while True:
         command = input_to(Get())
         myClan.king.move(command, myMap)
         if command == 'q':
+            terminate = True
             break
         elif command == ' ':
             if myClan.king.alive:

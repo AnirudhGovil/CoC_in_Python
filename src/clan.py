@@ -4,7 +4,7 @@ def distance(self, x, y):
         return ((self.location[0] - x)**2 + (self.location[1] - y)**2)** 0.5
 
 class Troop:
-    def __init__(self, maxHP, attack, speed, ID):
+    def __init__(self, maxHP, attack, speed, ID, aerial):
         self.ID = ID # symbol to be printed on screen
         self.location = [0,0] # X,Y
         self.attack = attack    # damage dealt per hit
@@ -12,6 +12,7 @@ class Troop:
         self.alive = True     #flag to check if alive
         self.maxHP = maxHP
         self.HP = maxHP # current HP
+        self.aerial = aerial
 
     def distanceTo(self, x, y):
         return ((self.location[0] - x)**2 + (self.location[1] - y)**2)** 0.5
@@ -25,7 +26,7 @@ class Troop:
     
 class King(Troop):
     def __init__(self, m, n):
-        super().__init__(1000, 50, 1, 'K')
+        super().__init__(1000, 50, 1, 'K',False)
         self.lastMove = 'w'
 
 
@@ -211,7 +212,7 @@ def adjacency_helper(self, x, y,speed):
 class Barbarian(Troop):
     
     def __init__(self, X, Y):
-        super().__init__(300, 50, 1, 'B')
+        super().__init__(300, 50, 1, 'B',False)
         self.location[0] = X
         self.location[1] = Y
            
@@ -279,7 +280,7 @@ def range_helper_archer(self, x, y):
 class Archer(Troop):
     
     def __init__(self, X, Y):
-        super().__init__(150, 25, 2, 'A')
+        super().__init__(150, 25, 2, 'A',False)
         self.location[0] = X
         self.location[1] = Y
     
@@ -328,11 +329,81 @@ class Archer(Troop):
                     # check if wall is blocking, and attack it 
                     for wall in Map.walls:
                         if (wall.alive == True):
-                            if wall.isStruct(self.location[0] + xMove, self.location[1] + yMove) or wall.isStruct(self.location[0] + ceil(xMove/2), self.location[1] + ceil(yMove/2)) or wall.isStruct(self.location[0] + ceil(xMove/2) +1, self.location[1] + ceil(yMove/2) + 1):
+                            if wall.isStruct(self.location[0] + xMove, self.location[1] + yMove) or wall.isStruct(self.location[0] + ceil(xMove/2), self.location[1] + ceil(yMove/2)) or wall.isStruct(self.location[0] + ceil(xMove/2) + ceil(xMove/4), self.location[1] + ceil(yMove/2) + ceil(yMove/4)):
                                 wall.takeDamage(self.attack)
                                 return
                     self.location[0] += xMove
                     self.location[1] += yMove             
+
+        return
+
+#helps find closest buidling            
+def closest_helper_balloon(self,Map):
+
+    flag=0 
+    closest=0
+    for building in Map.buildings:
+        if building.ID=='C':
+            if building.alive == True:
+                if(flag==0):
+                    closest = building
+                    minDist = Map.buildings[0].distanceTo(self.location[0], self.location[1])
+                    flag=1
+                dist = building.distanceTo(self.location[0], self.location[1])
+                if dist <= minDist:
+                    closest = building
+                    minDist = dist
+    if closest == 0:
+        for building in Map.buildings:
+            if building.alive == True:
+                if(flag==0):
+                    closest = building
+                    minDist = Map.buildings[0].distanceTo(self.location[0], self.location[1])
+                    flag=1
+                dist = building.distanceTo(self.location[0], self.location[1])
+                if dist <= minDist:
+                    closest = building
+                    minDist = dist
+    return closest
+
+class Balloon(Troop):
+    
+    def __init__(self, X, Y):
+        super().__init__(300, 100, 2, 'L',True)
+        self.location[0] = X
+        self.location[1] = Y
+           
+    
+    
+    def move(self, Map):
+       
+        if self.alive == True:
+            
+            # find closest structure
+            closest = closest_helper_balloon(self,Map)
+
+            if(closest):
+                
+                # attack it
+                if adjacency_helper(closest,self.location[0], self.location[1],self.speed) and closest.alive:
+                    closest.takeDamage(self.attack)
+
+                # move otherwise
+                else:
+                    xMove = 0
+                    yMove = 0
+                    if closest.location[0] + closest.sizeX/2 > self.location[0]: 
+                            xMove += self.speed
+                    elif closest.location[0] + closest.sizeX/2 < self.location[0]:
+                            xMove -= self.speed
+                    if closest.location[1] + closest.sizeY/2 > self.location[1]:
+                            yMove += self.speed
+                    elif closest.location[1] + closest.sizeY/2 < self.location[1]:
+                            yMove -= self.speed
+                    
+
+                    self.location[0] += xMove
+                    self.location[1] += yMove            
 
         return
                 
@@ -359,6 +430,12 @@ class Clan:
                 self.troops.append(Archer(Map.n-1,Map.m-1))
             elif(location=='6'):
                 self.troops.append(Archer(Map.n-1,0))
+            elif(location=='7'):
+                self.troops.append(Balloon(0,Map.m-1))
+            elif(location=='8'):
+                self.troops.append(Balloon(Map.n-1,Map.m-1))
+            elif(location=='9'):
+                self.troops.append(Balloon(Map.n-1,0))
             self.spawnsLeft -= 1
             return 1
         else:
