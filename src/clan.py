@@ -158,12 +158,6 @@ class King(Troop):
                     Map.registerHit(self.location[0]-1, self.location[1]+2, self.attack/2)
                     Map.registerHit(self.location[0]+1, self.location[1]+2, self.attack/2)
                     Map.registerHit(self.location[0]-1, self.location[1]-2, self.attack/2)
-                    
-                    
-
-                    
-                    
-
 
             # no move occured
             else:
@@ -210,6 +204,54 @@ def adjacency_helper(self, x, y):
     return False  
 
 class Barbarian(Troop):
+    
+    def __init__(self, X, Y):
+        super().__init__(300, 50, 1, 'B')
+        self.location[0] = X
+        self.location[1] = Y
+           
+    
+    
+    def move(self, Map):
+       
+        if self.alive == True:
+            
+            # find closest structure
+            closest = closest_helper(self,Map)
+
+            if(closest):
+                
+                # attack it
+                if adjacency_helper(closest,self.location[0], self.location[1]) and closest.alive:
+                    closest.takeDamage(self.attack)
+
+                # move otherwise
+                else:
+                    xMove = 0
+                    yMove = 0
+                    if closest.location[0] + closest.sizeX/2 > self.location[0]:
+                        xMove += self.speed
+                    elif closest.location[0] + closest.sizeX/2 < self.location[0]:
+                        xMove -= self.speed
+
+                    if closest.location[1] + closest.sizeY/2 > self.location[1]:
+                        yMove += self.speed
+                    elif closest.location[1] + closest.sizeY/2 < self.location[1]:
+                        yMove -= self.speed
+
+                    # check if wall is blocking, and attack it 
+                    for wall in Map.walls:
+                        if (wall.alive == True):
+                            if wall.isStruct(self.location[0] + xMove, self.location[1] + yMove):
+                                wall.takeDamage(self.attack)
+                                return
+
+                    self.location[0] += xMove
+                    self.location[1] += yMove            
+
+        return
+
+class Archer(Troop):
     
     def __init__(self, X, Y):
         super().__init__(300, 50, 1, 'B')

@@ -166,7 +166,7 @@ class Map:
         else:
             plan[clan.king.location[1]][clan.king.location[0]][1] = 'bl'
                 
-        print("\033c")  # clear screen
+        #print("\033c")  # clear screen
         fb = ''
         for i in range(self.m):
             for j in range(self.n):
