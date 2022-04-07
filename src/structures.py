@@ -2,6 +2,9 @@
 from colorama import Fore, Back, Style
 import numpy as np
 
+def distance(self, x, y):
+        return ((self.location[0] - x)**2 + (self.location[1] - y)**2)** 0.5
+
 class Structure:
     def __init__(self, X, Y, sizeX, sizeY, maxHP, ID):
         self.ID = ID # symbol to be printed on screen
@@ -57,7 +60,7 @@ def closest_helper_cannon(self,Clan):
                 allELiminated=False
                 if(flag==0):
                     closest = troop
-                    minDist = Clan.troops[0].distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+                    minDist = troop.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
                     flag=1
                 dist = troop.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
                 if dist <= minDist:
@@ -95,6 +98,70 @@ class Cannon(Structure):
             self.fired=True
         
         return
+
+def closest_helper_wizard(self,Clan):
+
+    # no troops on map
+    if(len(Clan.troops) == 0):
+        if Clan.king.alive == True:
+            closest = Clan.king
+            minDist = Clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+        else:
+            closest=0
+            minDist = 999999 # hold fire
+    else:
+        allELiminated=True # flag for checking if there are any troops
+        flag=0 
+        closest=0
+        for troop in Clan.troops:
+            if troop.alive == True:
+                allELiminated=False
+                if(flag==0):
+                    closest = troop
+                    minDist = troop.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+                    flag=1
+                dist = troop.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+                if dist <= minDist:
+                    closest = troop
+                    minDist = dist
+
+        if(allELiminated):
+            if Clan.king.alive == True:
+                closest = Clan.king
+                minDist = Clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+            else:
+                closest=0
+                minDist = 999999 # hold fire
+
+        if Clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2) < minDist:
+            closest = Clan.king
+            minDist = Clan.king.distanceTo(self.location[0] + self.sizeX/2, self.location[1] + self.sizeY/2)
+
+    return closest,minDist
+
+class Wizard(Structure):
+    def __init__(self, x, y, maxHP):
+        Structure.__init__(self, x, y, 2, 2, maxHP, 'Z')
+        self.range = 7
+        self.attack = 50
+        self.fired=False
+        
+    def fire(self, clan):
+        # reset canon colour
+        self.fired=False
+        closest,minDist=closest_helper_wizard(self,clan)
+        # fire in range        
+        if minDist <= self.range: 
+            #if damage_helper(closest):
+            #    closest.takeDamage(self.attack)
+            if distance(clan.king,closest.location[0],closest.location[1])<=1:
+                    clan.king.takeDamage(self.attack)
+            for troop in clan.troops:
+                if distance(troop,closest.location[0],closest.location[1])<=1:
+                    troop.takeDamage(self.attack)
+            self.fired=True
+        
+        return
     
 class Wall(Structure):
     def __init__(self, x, y, maxHP):
@@ -128,6 +195,10 @@ class Map:
                         if(isinstance(building, Cannon)):
                             if(building.fired == True):
                                 plan[building.location[1] + i][building.location[0] + j][0] = 'f' # + building.type # building has fired
+                        
+                        if(isinstance(building, Wizard)):
+                            if(building.fired == True):
+                                plan[building.location[1] + i][building.location[0] + j][0] = 'z'
 
                         if building.HP/building.maxHP > 0.66:
                             plan[building.location[1] + i][building.location[0] + j][1] = 'g'
@@ -194,6 +265,9 @@ class Map:
                 elif(plan[i][j][0] == 'C'):
                     fb += Back.BLUE + 'C ' + Style.NORMAL
 
+                elif(plan[i][j][0] == 'Z'):
+                    fb += Back.BLUE + 'Z ' + Style.NORMAL
+
                 elif(plan[i][j][0] == 'H'):
                     fb += Back.MAGENTA + 'H ' + Style.NORMAL
 
@@ -202,6 +276,9 @@ class Map:
                 
                 elif(plan[i][j][0] == 'f'):
                     fb += Back.CYAN + 'C ' + Style.NORMAL
+
+                elif(plan[i][j][0] == 'z'):
+                    fb += Back.CYAN + 'Z ' + Style.NORMAL
                 
                 elif(plan[i][j][0] == 'K' and clan.king.alive):
                     fb += Back.WHITE + Fore.BLACK + clan.king.ID + " " + Style.NORMAL
@@ -245,6 +322,10 @@ class Map:
         c = Cannon(x,y,maxHP)
         self.buildings.append(c)
     
+    def addWizard(self, x, y,maxHP):
+        c = Wizard(x,y,maxHP)
+        self.buildings.append(c)
+
     def addWall(self, x, y,maxHP):
         w = Wall(x,y,maxHP)
         self.walls.append(w)
@@ -253,6 +334,9 @@ class Map:
     def fireCanons(self, clan):
         for building in self.buildings:
             if isinstance(building, Cannon):
+                if building.alive: 
+                    building.fire(clan)
+            if isinstance(building, Wizard):
                 if building.alive: 
                     building.fire(clan)
     
@@ -293,9 +377,13 @@ class Map:
         self.addHut(8,12,300)
         self.addHut(17,17,300)
 
-        self.addCannon(8,7,200)
-        self.addCannon(17,7,200)
-        self.addCannon(12,17,200)
+        #self.addCannon(8,7,200)
+        #self.addCannon(17,7,200)
+        #self.addCannon(12,17,200)
+
+        self.addWizard(8,7,200)
+        self.addWizard(17,7,200)
+        self.addWizard(12,17,200)
 
         self.addWall(6,5,400)
         self.addWall(7,5,400)

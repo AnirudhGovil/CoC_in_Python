@@ -89,20 +89,20 @@ while True:
             if myClan.spawn(command, myMap):
                 status = "Barbarian spawned at spawnpoint " + command
             else:
-                status = "No more spawns available"
+                status = "No more barbarian spawns available"
 
         elif command =='4' or command =='5' or command =='6':
             if myClan.spawn(command, myMap):
                 status = "Archer spawned at spawnpoint " + command
             else:
-                status = "No more spawns available"
+                status = "No more archer spawns available"
 
         elif command =='7' or command =='8' or command =='9':
             if myClan.spawn(command, myMap):
                 status = "Balloon spawned at spawnpoint " + command
             else:
-                status = "No more spawns available"
-                
+                status = "No more balloon spawns available"
+
         #for saving the replay
         replay_list1.append(copy.deepcopy(myMap))
         replay_list2.append(copy.deepcopy(myClan))

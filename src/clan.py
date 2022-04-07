@@ -343,7 +343,7 @@ def closest_helper_balloon(self,Map):
     flag=0 
     closest=0
     for building in Map.buildings:
-        if building.ID=='C':
+        if building.ID=='C' or building.ID=='Z':
             if building.alive == True:
                 if(flag==0):
                     closest = building
