@@ -1,6 +1,4 @@
 # parent class for all buildings
-from random import seed
-from unittest import case
 from colorama import Fore, Back, Style
 import numpy as np
 
