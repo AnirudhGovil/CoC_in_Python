@@ -42,7 +42,7 @@ def background():
         # move troops
         myClan.moveTroops(myMap)
         myMap.fireCanons(myClan)
-        time.sleep(0.25)
+        time.sleep(0.5)
         if terminate:
             break
 
@@ -64,7 +64,6 @@ while True:
         elif flag == 0:
             pass
 
-        command = ''
         command = input_to(Get())
         myClan.king.move(command, myMap)
         if command == 'q':

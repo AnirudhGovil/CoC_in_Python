@@ -194,7 +194,7 @@ def closest_helper(self,Map):
     return closest
 
 # checks if a position is adjacent to the structure     
-def adjacency_helper(self, x, y,speed):           
+def adjacency_helper(self, x, y):           
     if ((x == self.location[0] + self.sizeX or x == self.location[0] -1)
         and
         (y <= self.location[1] + self.sizeY and y >= self.location[1] - 1)
@@ -228,7 +228,7 @@ class Barbarian(Troop):
             if(closest):
                 
                 # attack it
-                if adjacency_helper(closest,self.location[0], self.location[1],self.speed) and closest.alive:
+                if adjacency_helper(closest,self.location[0], self.location[1]) and closest.alive:
                     closest.takeDamage(self.attack)
 
                 # move otherwise
@@ -272,7 +272,7 @@ class Barbarian(Troop):
 # checks if a position is adjacent to the structure     
 def range_helper_archer(self, x, y):           
     
-    if distance(self,x,y) <= 7 or distance(self,x+self.sizeX,y) <=7 or distance(self,x,y+self.sizeY) <=7 or distance(self,x-self.sizeX,y) <=7 or distance(self,x,y-self.sizeY) <=7:
+    if distance(self,x,y) <= 7 or distance(self,x-self.sizeX,y) <=7 or distance(self,x,y-self.sizeY) <=7 or distance(self,x-self.sizeX,y-self.sizeY) <=7 :
         return True
 
     return False  
@@ -366,6 +366,14 @@ def closest_helper_balloon(self,Map):
                     minDist = dist
     return closest
 
+# checks if a position is adjacent to the structure     
+def range_helper_balloon(self, x, y):           
+    
+    if distance(self,x,y) <= 2 or distance(self,-self.sizeX,y) <=2 or distance(self,x,y-self.sizeY) <=2 or distance(self,x-self.sizeX,y-self.sizeY) <=2 :
+        return True
+
+    return False  
+
 class Balloon(Troop):
     
     def __init__(self, X, Y):
@@ -385,25 +393,27 @@ class Balloon(Troop):
             if(closest):
                 
                 # attack it
-                if adjacency_helper(closest,self.location[0], self.location[1],self.speed) and closest.alive:
+                if range_helper_balloon(closest,self.location[0], self.location[1]) and closest.alive:
                     closest.takeDamage(self.attack)
-
+                    
                 # move otherwise
                 else:
                     xMove = 0
                     yMove = 0
-                    if closest.location[0] + closest.sizeX/2 > self.location[0]: 
+                    if closest.location[0] + closest.sizeX >= self.location[0] + self.speed:  
                             xMove += self.speed
-                    elif closest.location[0] + closest.sizeX/2 < self.location[0]:
+                    elif closest.location[0] + closest.sizeX <= self.location[0] - self.speed:
                             xMove -= self.speed
-                    if closest.location[1] + closest.sizeY/2 > self.location[1]:
+                    if closest.location[1] + closest.sizeY >= self.location[1] + self.speed:
                             yMove += self.speed
-                    elif closest.location[1] + closest.sizeY/2 < self.location[1]:
+                    elif closest.location[1] + closest.sizeY <= self.location[1] - self.speed:
                             yMove -= self.speed
                     
 
                     self.location[0] += xMove
-                    self.location[1] += yMove            
+                    self.location[1] += yMove    
+            else:
+                return        
 
         return
                 
