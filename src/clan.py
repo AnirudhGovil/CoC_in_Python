@@ -1,5 +1,7 @@
 from math import *
 
+from numpy import append
+
 def distance(self, x, y):
         return ((self.location[0] - x)**2 + (self.location[1] - y)**2)** 0.5
 
@@ -164,6 +166,135 @@ class King(Troop):
                     Map.registerHit(self.location[0]-1, self.location[1]+2, self.attack/2)
                     Map.registerHit(self.location[0]+1, self.location[1]+2, self.attack/2)
                     Map.registerHit(self.location[0]-1, self.location[1]-2, self.attack/2)
+
+            # no move occured
+            else:
+                return False
+            
+            # move occured
+            return True
+        
+        # no move occured
+        else:
+            return False
+
+class Queen(Troop):
+    def __init__(self, m, n):
+        super().__init__(1000, 10, 1, 'Q',False)
+        self.lastMove = 'w'
+
+    # checks if move is in range
+    def validMove(self, x, y, Map):
+        if x >= Map.n or y >= Map.m or x <=-1 or y<=-1:
+            return 2
+
+        for building in Map.buildings:
+            if building.alive:
+                if x >= building.location[0] and x < building.location[0] + building.sizeX and y >= building.location[1] and y < building.location[1] + building.sizeY:
+                    return 3
+        
+        for wall in Map.walls:
+            if wall.alive:
+                if x == wall.location[0] and y == wall.location[1]:
+                    return 3
+
+        return 1
+
+    # checks if move is colliding
+    def collidingMove(self,x,y,Map):
+
+        for building in Map.buildings:
+            if building.alive:
+                if x >= building.location[0] and x < building.location[0] + building.sizeX and y >= building.location[1] and y < building.location[1] + building.sizeY:
+                    return 0
+        
+        for wall in Map.walls:
+            if wall.alive:
+                if x == wall.location[0] and y == wall.location[1]:
+                    return 0
+        
+        return 1
+
+    
+    
+    def move(self, command, Map):
+
+        temp = 0
+
+        # valid non-movement input
+        if command == '1' or command == '2' or command == '3' or command == 'h' or command == 'j' or command == 'k' or command == 'q':
+            return True
+
+        if self.alive == True:
+
+        # movement
+            if command == 'w' and self.location[1] > 0:
+                self.lastMove = 'w'
+                self.ID = '^'
+                temp = self.validMove(self.location[0], self.location[1] - self.speed, Map) * self.collidingMove(self.location[0], self.location[1] - 1, Map)
+                if temp == 1:
+                    self.location[1] -= self.speed
+                elif temp == 2:
+                    self.location[1] = 0
+                elif temp == 3:
+                    self.location[1] -= 1
+
+
+            elif command == 'a' and self.location[0] > 0:
+                self.lastMove = 'a'
+                self.ID = '<'
+                temp = self.validMove(self.location[0] - self.speed, self.location[1], Map) * self.collidingMove(self.location[0] - 1, self.location[1], Map)
+                if temp == 1:
+                    self.location[0] -= self.speed
+                elif temp == 2:
+                    self.location[0] = 0
+                elif temp == 3:
+                    self.location[0] -= 1
+
+
+            elif command == 's' and self.location[1] < Map.m - 1:
+                self.lastMove = 's'
+                self.ID = 'v'
+                temp = self.validMove(self.location[0], self.location[1] + self.speed, Map) * self.collidingMove(self.location[0], self.location[1] + 1, Map)
+                if temp == 1:
+                    self.location[1] += self.speed
+                elif temp == 2:
+                    self.location[1] = Map.m - 1
+                elif temp == 3:
+                    self.location[1] += 1
+
+
+
+            elif command == 'd' and self.location[0] < Map.n - 1:
+                self.lastMove = 'd'
+                self.ID = '>'
+                temp = self.validMove(self.location[0] + self.speed, self.location[1], Map) * self.collidingMove(self.location[0] + 1, self.location[1], Map)
+                if temp == 1:
+                    self.location[0] += self.speed
+                elif temp == 2:
+                    self.location[0] = Map.n - 1
+                elif temp == 3:
+                    self.location[0] += 1
+
+            # attacking
+            elif command == ' ':  
+                centre=[]          
+                if self.lastMove == 'w':
+                    centre.append(self.location[0])
+                    centre.append(self.location[1] - 8)
+                elif self.lastMove == 'a':
+                    centre.append(self.location[0] - 8)
+                    centre.append(self.location[1])
+                elif self.lastMove == 's':
+                    centre.append(self.location[0])
+                    centre.append(self.location[1] + 8)
+                elif self.lastMove == 'd':
+                    centre.append(self.location[0] + 8)
+                    centre.append(self.location[1])
+                for i in range(centre[0]-2,centre[0]+3):
+                    for j in range(centre[1]-2,centre[1]+3):
+                        Map.registerHit(i,j, self.attack)
+            
 
             # no move occured
             else:
@@ -418,8 +549,11 @@ class Balloon(Troop):
         return
                 
 class Clan:
-    def __init__(self, m, n, b,a,l, h_uses, j_uses):
-        self.king = King(m, n)
+    def __init__(self, m, n, b,a,l, h_uses, j_uses,leader):
+        if leader==1:
+            self.king = King(m, n)
+        if leader==2:
+            self.king = Queen(m,n)
         self.troops = []
         self.barbarianSpawnsLeft = b
         self.archerSpawnsLeft = a

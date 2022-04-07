@@ -191,6 +191,13 @@ class Map:
                 for j in range(building.sizeY):
                     for i in range(building.sizeX):
                         plan[building.location[1] + i][building.location[0] + j][0] = building.ID
+
+                        if building.HP/building.maxHP > 0.66:
+                            plan[building.location[1] + i][building.location[0] + j][1] = 'g'
+                        elif building.HP/building.maxHP > 0.33:
+                            plan[building.location[1] + i][building.location[0] + j][1] = 'y'
+                        else:
+                            plan[building.location[1] + i][building.location[0] + j][1] = 'r'
                         
                         if(isinstance(building, Cannon)):
                             if(building.fired == True):
@@ -200,12 +207,7 @@ class Map:
                             if(building.fired == True):
                                 plan[building.location[1] + i][building.location[0] + j][0] = 'z'
 
-                        if building.HP/building.maxHP > 0.66:
-                            plan[building.location[1] + i][building.location[0] + j][1] = 'g'
-                        elif building.HP/building.maxHP > 0.33:
-                            plan[building.location[1] + i][building.location[0] + j][1] = 'y'
-                        else:
-                            plan[building.location[1] + i][building.location[0] + j][1] = 'r'
+                      
                     
         for wall in self.walls:
             if wall.alive:
@@ -229,6 +231,7 @@ class Map:
                     plan[troop.location[1]][troop.location[0]][1] = 'r'
         
 
+        
         plan[clan.king.location[1]][clan.king.location[0]][0] = 'K'
         if clan.king.alive:
             plan[clan.king.location[1]][clan.king.location[0]][1] = 'w'
@@ -286,6 +289,9 @@ class Map:
                 elif(plan[i][j][0] == 'K' and clan.king.alive==False):
                     fb += Back.BLACK + '██' + Style.NORMAL
 
+                elif(plan[i][j][0] == 'Q' and clan.king.alive==False):
+                    fb += Back.BLACK + '██' + Style.NORMAL
+
                 elif(plan[i][j][0] == 'S'):
                     fb += Back.WHITE + 'S ' + Style.NORMAL
 
@@ -303,7 +309,7 @@ class Map:
         
         # print the HP bar
         if (clan.king.HP <= 0):
-            print("The king has died!", end= '')
+            print("You have died!", end= '')
         health = '██'*int(clan.king.HP/clan.king.maxHP * self.n)
         print(health)
         
@@ -363,7 +369,7 @@ class Map:
         for troop in Clan.troops:
             if troop.alive:
                 troopAlive = True
-        if troopAlive == False and Clan.king.alive == False and Clan.spawnsLeft == 0:
+        if troopAlive == False and Clan.king.alive == False and Clan.barbarianSpawnsLeft == 0 and Clan.archerSpawnsLeft == 0 and Clan.balloonSpawnsLeft == 0:
             return -1
         else:
             return 0

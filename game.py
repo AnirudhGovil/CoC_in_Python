@@ -13,7 +13,10 @@ terminate = False
 m = 25
 n = 25
 x=0
-myClan = Clan(m, n,3,3,3 , 2 , 1)
+leader = 0
+while leader==0 :
+    leader=int(input("Select 1 for King and 2 for Queen\n"))
+myClan = Clan(m, n,3,3,3 , 2 , 1,leader)
 
 #replay file
 replay_list2 = [myClan,]
@@ -80,10 +83,13 @@ while True:
         if command == 'q':
             terminate = True
             break
-        elif command == ' ':
+        elif command == ' ' and leader==1:
             if myClan.king.alive:
                 status = "King attacks with sword!"
-        elif command == 'x':
+        elif command == ' ' and leader==2:
+            if myClan.king.alive:
+                status = "Queen launches arrows!"
+        elif command == 'x' and leader==1:
             if myClan.king.alive:
                 status = "King attacks with axe!"
         elif command == 'h':
