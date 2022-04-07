@@ -46,7 +46,7 @@ threading1.daemon = True
 threading1.start()
 
 while True:
-
+        old_status = status
         flag=myMap.checkWinLoss(myClan)
         if flag == 1:
             print("You won!")
@@ -83,9 +83,6 @@ while True:
                 status = "Troop spawned at spawnpoint " + command
             else:
                 status = "No more spawns available"
-        # print status texts
-        print("\n"+status)
-
         #for saving the replay
         replay_list1.append(copy.deepcopy(myMap))
         replay_list2.append(copy.deepcopy(myClan))
@@ -93,16 +90,15 @@ while True:
         os.system('clear')
         myMap.draw(myClan)
         
+        # print status texts
+        if(old_status==status):
+            print("\n"+status)
 
 
 with open("replays/maps", 'wb') as f:
     dump(replay_list1, f)
 with open("replays/clans", 'wb') as f:
     dump(replay_list2, f)
-if(flag==1): 
-    print("You won!")  
-if(flag==-1):
-    print("You lost.")
 print("Game Over")
 
 sys.exit()

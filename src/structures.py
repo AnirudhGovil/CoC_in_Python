@@ -166,7 +166,6 @@ class Map:
         else:
             plan[clan.king.location[1]][clan.king.location[0]][1] = 'bl'
                 
-        #print("\033c")  # clear screen
         fb = ''
         for i in range(self.m):
             for j in range(self.n):
@@ -218,16 +217,14 @@ class Map:
                 elif(plan[i][j][0] == 'B'):
                     fb += Back.LIGHTWHITE_EX + 'B ' + Style.NORMAL
 
-            fb += '\n'
-        print(fb, end='')
+            fb += '\n' + Back.RESET + Fore.RESET + Style.RESET_ALL
+        print(fb)
         
         # print the HP bar
-        print('\033[38;2;177;0;186m', end='')
         if (clan.king.HP <= 0):
             print("The king has died!", end= '')
-        for i in range(int(clan.king.HP/clan.king.maxHP * self.n)):
-            print('██', end='')
-        print('\033[40m\033[0m')
+        health = '██'*int(clan.king.HP/clan.king.maxHP * self.n)
+        print(health)
         
 
     
