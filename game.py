@@ -12,12 +12,23 @@ terminate = False
 
 m = 25
 n = 25
-myClan = Clan(m, n,5,5,5 , 2 , 1)
+x=0
+myClan = Clan(m, n,3,3,3 , 2 , 1)
 
 #replay file
 replay_list2 = [myClan,]
 myMap = Map(m, n)
-myMap.setupMap()
+while x!=1 or x!=2 or x!=3 :
+    x=int(input("Select Level 1,2 or 3\n"))
+    if x==1:
+        myMap.setupMaplvl1()
+        break
+    elif x==2:
+        myMap.setupMaplvl2()
+        break
+    elif x==3:
+        myMap.setupMaplvl3()
+        break
 myMap.draw(myClan)
 
 replay_list1 = [myMap,]
@@ -120,5 +131,7 @@ with open("replays/maps", 'wb') as f:
     dump(replay_list1, f)
 with open("replays/clans", 'wb') as f:
     dump(replay_list2, f)
+os.system('clear')
+myMap.draw(myClan)
 print("Game Over")
 
