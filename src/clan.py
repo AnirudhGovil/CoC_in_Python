@@ -418,36 +418,61 @@ class Balloon(Troop):
         return
                 
 class Clan:
-    def __init__(self, m, n, size, h_uses, j_uses):
+    def __init__(self, m, n, b,a,l, h_uses, j_uses):
         self.king = King(m, n)
         self.troops = []
-        self.spawnsLeft = size
+        self.barbarianSpawnsLeft = b
+        self.archerSpawnsLeft = a
+        self.balloonSpawnsLeft = l
         self.healSpell = h_uses
         self.rageSpell = j_uses
         
     def spawn(self, location, Map):
         # location can be either 1 2 or 3
-        if self.spawnsLeft > 0:
+        if self.barbarianSpawnsLeft > 0:
             if(location=='1'):
                 self.troops.append(Barbarian(0,Map.m-1))
+                self.barbarianSpawnsLeft -= 1
+                return 1
             elif(location=='2'):
                 self.troops.append(Barbarian(Map.n-1,Map.m-1))
+                self.barbarianSpawnsLeft -= 1
+                return 1
             elif(location=='3'):
                 self.troops.append(Barbarian(Map.n-1,0))
-            elif(location=='4'):
+                self.barbarianSpawnsLeft -= 1
+                return 1
+            
+
+        if self.archerSpawnsLeft > 0:
+            if(location=='4'):
                 self.troops.append(Archer(0,Map.m-1))
+                self.archerSpawnsLeft -= 1
+                return 1
             elif(location=='5'):
                 self.troops.append(Archer(Map.n-1,Map.m-1))
+                self.archerSpawnsLeft -= 1
+                return 1
             elif(location=='6'):
                 self.troops.append(Archer(Map.n-1,0))
-            elif(location=='7'):
+                self.archerSpawnsLeft -= 1
+                return 1
+            
+                
+        if self.balloonSpawnsLeft > 0:
+            if(location=='7'):
                 self.troops.append(Balloon(0,Map.m-1))
+                self.balloonSpawnsLeft -= 1
+                return 1
             elif(location=='8'):
                 self.troops.append(Balloon(Map.n-1,Map.m-1))
+                self.balloonSpawnsLeft -= 1
+                return 1
             elif(location=='9'):
                 self.troops.append(Balloon(Map.n-1,0))
-            self.spawnsLeft -= 1
-            return 1
+                self.balloonSpawnsLeft -= 1
+                return 1
+
         else:
             return 0
     

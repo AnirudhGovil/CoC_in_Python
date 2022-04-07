@@ -12,7 +12,7 @@ terminate = False
 
 m = 25
 n = 25
-myClan = Clan(m, n, 10, 2 , 1)
+myClan = Clan(m, n,5,5,5 , 2 , 1)
 
 #replay file
 replay_list2 = [myClan,]
@@ -85,11 +85,24 @@ while True:
                status = "Rage spell used"
            else:
                status = "No more rage spells"
-        elif command == '1' or command == '2' or command == '3' or command =='4' or command =='5' or command =='6' or  command =='7' or command =='8' or command =='9':
+        elif command == '1' or command == '2' or command == '3' :
             if myClan.spawn(command, myMap):
-                status = "Troop spawned at spawnpoint " + command
+                status = "Barbarian spawned at spawnpoint " + command
             else:
                 status = "No more spawns available"
+
+        elif command =='4' or command =='5' or command =='6':
+            if myClan.spawn(command, myMap):
+                status = "Archer spawned at spawnpoint " + command
+            else:
+                status = "No more spawns available"
+
+        elif command =='7' or command =='8' or command =='9':
+            if myClan.spawn(command, myMap):
+                status = "Balloon spawned at spawnpoint " + command
+            else:
+                status = "No more spawns available"
+                
         #for saving the replay
         replay_list1.append(copy.deepcopy(myMap))
         replay_list2.append(copy.deepcopy(myClan))
