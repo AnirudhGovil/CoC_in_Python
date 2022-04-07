@@ -8,6 +8,8 @@ from pickle import dump
 import copy
 import os
 
+terminate = False
+
 m = 25
 n = 25
 myClan = Clan(m, n, 10, 2 , 1)
@@ -34,12 +36,15 @@ def background():
     global myMap
     global status
     global flag
+    global terminate
 
     while True:
         # move troops
         myClan.moveTroops(myMap)
         myMap.fireCanons(myClan)
         time.sleep(0.25)
+        if terminate:
+            break
 
 threading1 = threading.Thread(target=background)
 threading1.daemon = True
@@ -50,9 +55,11 @@ while True:
         flag=myMap.checkWinLoss(myClan)
         if flag == 1:
             print("You won!")
+            terminate = True
             break
         elif flag == -1:
             print("You lost.")
+            terminate = True
             break
         elif flag == 0:
             pass
@@ -78,7 +85,7 @@ while True:
                status = "Rage spell used"
            else:
                status = "No more rage spells"
-        elif command == '1' or command == '2' or command == '3':
+        elif command == '1' or command == '2' or command == '3' or command =='4' or command =='5' or command =='6' or  command =='7' or command =='8' or command =='9':
             if myClan.spawn(command, myMap):
                 status = "Troop spawned at spawnpoint " + command
             else:
@@ -94,6 +101,7 @@ while True:
         if(old_status==status):
             print("\n"+status)
 
+threading1.join()
 
 with open("replays/maps", 'wb') as f:
     dump(replay_list1, f)
@@ -101,4 +109,3 @@ with open("replays/clans", 'wb') as f:
     dump(replay_list2, f)
 print("Game Over")
 
-sys.exit()

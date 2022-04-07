@@ -81,7 +81,7 @@ def closest_helper(self,Clan):
 class Cannon(Structure):
     def __init__(self, x, y, maxHP):
         Structure.__init__(self, x, y, 2, 2, maxHP, 'C')
-        self.range = 8
+        self.range = 7
         self.attack = 50
         self.fired=False
         
@@ -214,6 +214,9 @@ class Map:
 
                 elif(plan[i][j][0] == 'B'):
                     fb += Back.LIGHTWHITE_EX + 'B ' + Style.NORMAL
+
+                elif(plan[i][j][0] == 'A'):
+                   fb += Back.LIGHTWHITE_EX + 'A ' + Style.NORMAL
 
             fb += '\n' + Back.RESET + Fore.RESET + Style.RESET_ALL
         print(fb)
