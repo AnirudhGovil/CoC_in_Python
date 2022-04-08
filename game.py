@@ -8,130 +8,137 @@ from pickle import dump
 import copy
 import os
 
-terminate = False
 
-m = 25
-n = 25
-x=0
 leader = 0
 while leader==0 :
     leader=int(input("Select 1 for King and 2 for Queen\n"))
-myClan = Clan(m, n,3,3,3 , 2 , 1,leader)
 
-#replay file
+x=0
+
+m = 25
+n = 25
+
+myClan = Clan(m, n,3,3,3 , 2 , 1,leader)
 replay_list2 = [myClan,]
 myMap = Map(m, n)
-while x!=1 or x!=2 or x!=3 :
-    x=int(input("Select Level 1,2 or 3\n"))
+myMap.draw(myClan)
+replay_list1 = [myMap,]
+
+for x in range (1,3):
+    terminate = False
+
+    if(x>1):
+        myClan = Clan(m, n,3,3,3 , 2 , 1,leader)
+        myMap = Map(m, n)
+    #while x!=1 or x!=2 or x!=3 :
+    #    x=int(input("Select 1 for Easy,2 for Normal or 3 for Hard\n"))
     if x==1:
         myMap.setupMaplvl1()
-        break
+    #    break
     elif x==2:
         myMap.setupMaplvl2()
-        break
+    #    break
     elif x==3:
         myMap.setupMaplvl3()
-        break
-myMap.draw(myClan)
+    #    break
+    myMap.draw(myClan)
+    # render loop
 
-replay_list1 = [myMap,]
-# render loop
+    status = ''
+    flag=0
 
-status = ''
-flag=0
+    replay_list1.append(myMap)
+    replay_list2.append(myClan)
 
-replay_list1.append(myMap)
-replay_list2.append(myClan)
+    def background():
+        global myClan
+        global replay_list1
+        global replay_list2
+        global myMap
+        global status
+        global flag
+        global terminate
 
-def background():
-    global myClan
-    global replay_list1
-    global replay_list2
-    global myMap
-    global status
-    global flag
-    global terminate
+        while True:
+            # move troops
+            myClan.moveTroops(myMap)
+            myMap.fireCanons(myClan)
+            time.sleep(0.5)
+            if terminate:
+                break
+
+    threading1 = threading.Thread(target=background)
+    threading1.daemon = True
+    threading1.start()
 
     while True:
-        # move troops
-        myClan.moveTroops(myMap)
-        myMap.fireCanons(myClan)
-        time.sleep(0.5)
-        if terminate:
-            break
+            old_status = status
+            flag=myMap.checkWinLoss(myClan)
+            if flag == 1:
+                print("You won!")
+                terminate = True
+                break
+            elif flag == -1:
+                print("You lost.")
+                terminate = True
+                break
+            elif flag == 0:
+                pass
 
-threading1 = threading.Thread(target=background)
-threading1.daemon = True
-threading1.start()
+            command = input_to(Get())
+            myClan.king.move(command, myMap)
+            if command == 'q':
+                terminate = True
+                break
+            elif command == ' ' and leader==1:
+                if myClan.king.alive:
+                    status = "King attacks with sword!"
+            elif command == ' ' and leader==2:
+                if myClan.king.alive:
+                    status = "Queen launches arrows!"
+            elif command == 'x' and leader==1:
+                if myClan.king.alive:
+                    status = "King attacks with axe!"
+            elif command == 'h':
+                if myClan.useHealSpell() :
+                    status = ('Heal spell used')
+                else:
+                    status = "No more heal spells"
+            elif command == 'j':
+               if myClan.useRageSpell():
+                   status = "Rage spell used"
+               else:
+                   status = "No more rage spells"
+            elif command == '1' or command == '2' or command == '3' :
+                if myClan.spawn(command, myMap):
+                    status = "Barbarian spawned at spawnpoint " + command
+                else:
+                    status = "No more barbarian spawns available"
 
-while True:
-        old_status = status
-        flag=myMap.checkWinLoss(myClan)
-        if flag == 1:
-            print("You won!")
-            terminate = True
-            break
-        elif flag == -1:
-            print("You lost.")
-            terminate = True
-            break
-        elif flag == 0:
-            pass
+            elif command =='4' or command =='5' or command =='6':
+                if myClan.spawn(command, myMap):
+                    status = "Archer spawned at spawnpoint " + command
+                else:
+                    status = "No more archer spawns available"
 
-        command = input_to(Get())
-        myClan.king.move(command, myMap)
-        if command == 'q':
-            terminate = True
-            break
-        elif command == ' ' and leader==1:
-            if myClan.king.alive:
-                status = "King attacks with sword!"
-        elif command == ' ' and leader==2:
-            if myClan.king.alive:
-                status = "Queen launches arrows!"
-        elif command == 'x' and leader==1:
-            if myClan.king.alive:
-                status = "King attacks with axe!"
-        elif command == 'h':
-            if myClan.useHealSpell() :
-                status = ('Heal spell used')
-            else:
-                status = "No more heal spells"
-        elif command == 'j':
-           if myClan.useRageSpell():
-               status = "Rage spell used"
-           else:
-               status = "No more rage spells"
-        elif command == '1' or command == '2' or command == '3' :
-            if myClan.spawn(command, myMap):
-                status = "Barbarian spawned at spawnpoint " + command
-            else:
-                status = "No more barbarian spawns available"
+            elif command =='7' or command =='8' or command =='9':
+                if myClan.spawn(command, myMap):
+                    status = "Balloon spawned at spawnpoint " + command
+                else:
+                    status = "No more balloon spawns available"
 
-        elif command =='4' or command =='5' or command =='6':
-            if myClan.spawn(command, myMap):
-                status = "Archer spawned at spawnpoint " + command
-            else:
-                status = "No more archer spawns available"
+            #for saving the replay
+            replay_list1.append(copy.deepcopy(myMap))
+            replay_list2.append(copy.deepcopy(myClan))
 
-        elif command =='7' or command =='8' or command =='9':
-            if myClan.spawn(command, myMap):
-                status = "Balloon spawned at spawnpoint " + command
-            else:
-                status = "No more balloon spawns available"
+            os.system('clear')
+            myMap.draw(myClan)
 
-        #for saving the replay
-        replay_list1.append(copy.deepcopy(myMap))
-        replay_list2.append(copy.deepcopy(myClan))
+            # print status texts
+            if(old_status==status):
+                print("\n"+status)
 
-        os.system('clear')
-        myMap.draw(myClan)
-        
-        # print status texts
-        if(old_status==status):
-            print("\n"+status)
-
-threading1.join()
+    threading1.join()
 
 with open("replays/maps", 'wb') as f:
     dump(replay_list1, f)
